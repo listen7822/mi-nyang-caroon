@@ -6,7 +6,7 @@ public class TableManager : MonoBehaviour
 {
     public GameObject m_Table;
     const int X_TABLE_COUNT = 2;
-    const int Y_TABLE_COUNT = 1;
+    const int Y_TABLE_COUNT = 2;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,10 +24,9 @@ public class TableManager : MonoBehaviour
                 table.transform.SetParent(this.transform, false);
                 ++nIndexX;
             }
+            nIndexX = 0;
             ++nIndexY;
         }
-
-
     }
 
     // Update is called once per frame

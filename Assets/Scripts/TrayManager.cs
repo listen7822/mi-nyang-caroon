@@ -5,12 +5,12 @@ using UnityEngine;
 public class TrayManager : MonoBehaviour
 {
     private List<GameObject> m_Traies = new List<GameObject>();
-    private float m_velocity = 100.0f;
+    private float m_velocity = 30.0f;
 
     public int m_nTrayCnt = 3;
     public GameObject m_Tray;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         int nIndex = 0;
         for(int i = 0; i < m_nTrayCnt; ++i)
@@ -32,6 +32,7 @@ public class TrayManager : MonoBehaviour
         for(int i = 0; i < m_nTrayCnt; ++i)
         {
             // 오브젝트 이동.
+            m_Traies[i].transform.Translate(Vector2.left * m_velocity * Time.deltaTime);
         }
     }
 }
