@@ -10,15 +10,24 @@ public class Dish : MonoBehaviour
         MACAROON = 1
     }
 
-    public delegate void Callback(List<Ingredient> food);
+    enum DISH_STATE
+    {
+        NONE = 0,
+        ACTIVE,
+        INACTIVE
+    }
+
+    public delegate void Callback(Dish dish);
 
     private Callback m_Callback = null;
     private FOOD_TYPE m_FoodType = 0;
     private List<Ingredient> m_Ingredients = new List<Ingredient>();
+    private DISH_STATE m_State = DISH_STATE.NONE;
 
     // Start is called before the first frame update
     void Start()
     {
+        m_State = DISH_STATE.INACTIVE;
         GameObject trayManager = GameObject.Find("TrayManager") as GameObject;
         foreach (Transform tray in trayManager.transform)
         { 
@@ -43,8 +52,7 @@ public class Dish : MonoBehaviour
 
     public void OnClick()
     {
-        m_Callback(m_Ingredients);
-        Clear();
+        m_Callback(this);
     }
 
     // Public region.
@@ -55,16 +63,21 @@ public class Dish : MonoBehaviour
 
     public void OnSettingIngredient(Ingredient ingredient)
     {
-        Debug.Log("Ingrediant name : " + ingredient.NAME);
+        if(DISH_STATE.ACTIVE != m_State)
+        {
+            return;
+        }
+
+        Debug.Log("Ingrediant name : " + ingredient.GetType());
         m_Ingredients.Add(ingredient);
         GameObject foods = this.transform.Find("Foods").gameObject;
         foreach(Transform food in foods.transform)
         {
             Debug.Log("food name : " + food.name);
-            if(ingredient.NAME == food.name)
-            {
+            //if(ingredient.GetType() == )
+            //{
                 food.gameObject.SetActive(true);
-            }
+            //}
         }
     }
 
@@ -74,6 +87,17 @@ public class Dish : MonoBehaviour
         m_Callback += func;
     }
 
+    public void ChangeToActiveState()
+    {
+        Debug.Log("Active");
+        m_State = DISH_STATE.ACTIVE;
+    }
+
+    public void ChangeToInActiveState()
+    {
+        Debug.Log("Inactive");
+        m_State = DISH_STATE.INACTIVE;
+    }
 
     public void Clear()
     {

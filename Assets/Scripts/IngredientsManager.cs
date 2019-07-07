@@ -25,6 +25,18 @@ public class IngredientsManager : MonoBehaviour
             GameObject ingredient = GameObject.Instantiate(m_Ingredient) as GameObject;
             ingredient.transform.localPosition = new Vector2(nIndex * nSpaceThatOneObjectCanUse, -nCenterOffset);
             ingredient.transform.SetParent(this.transform, false);
+            if (0 == nIndex % 3)
+            {
+                ingredient.AddComponent<MacaroonTop>();
+            }
+            else if(1 == nIndex % 3)
+            {
+                ingredient.AddComponent<MacaroonMid>();
+            }
+            else if(2 == nIndex % 3)
+            {
+                ingredient.AddComponent<MacaroonBot>();
+            }
             ++nIndex;
         }
     } 

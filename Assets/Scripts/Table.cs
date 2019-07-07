@@ -14,7 +14,7 @@ public class Table : MonoBehaviour
         GameObject dishManager = GameObject.Find("DishManager") as GameObject;
         foreach(Transform dish in dishManager.transform)
         {
-            dish.GetComponent<Dish>().SetCallback(OnServingToGuest);
+            //dish.GetComponent<Dish>().SetCallback(OnServingToGuest);
         }
 
         GameObject foods = this.transform.Find("Foods").gameObject;
