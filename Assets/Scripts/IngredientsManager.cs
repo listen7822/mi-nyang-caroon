@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class IngredientsManager : MonoBehaviour
 {
@@ -27,15 +28,18 @@ public class IngredientsManager : MonoBehaviour
             ingredient.transform.SetParent(this.transform, false);
             if (0 == nIndex % 3)
             {
-                ingredient.AddComponent<MacaroonTop>();
+                ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.TOP);
+                ingredient.GetComponentInChildren<Text>().text = "M_Top";
             }
             else if(1 == nIndex % 3)
             {
-                ingredient.AddComponent<MacaroonMid>();
+                ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.MID);
+                ingredient.GetComponentInChildren<Text>().text = "M_Mid";
             }
             else if(2 == nIndex % 3)
             {
-                ingredient.AddComponent<MacaroonBot>();
+                ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.BOT);
+                ingredient.GetComponentInChildren<Text>().text = "M_Bot";
             }
             ++nIndex;
         }

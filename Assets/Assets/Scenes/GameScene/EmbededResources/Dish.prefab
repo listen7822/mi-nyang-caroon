@@ -342,6 +342,21 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5944691092185195026, guid: b4e20a8d9decd9a4790fb99dd72cf7db,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 5944691092185195026, guid: b4e20a8d9decd9a4790fb99dd72cf7db,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 43
+      objectReference: {fileID: 0}
+    - target: {fileID: 8058045252369917759, guid: b4e20a8d9decd9a4790fb99dd72cf7db,
+        type: 3}
+      propertyPath: m_Name
+      value: MacaroonTop
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b4e20a8d9decd9a4790fb99dd72cf7db, type: 3}
 --- !u!224 &1395649069740690541 stripped

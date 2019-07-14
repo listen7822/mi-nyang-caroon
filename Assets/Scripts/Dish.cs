@@ -17,9 +17,11 @@ public class Dish : MonoBehaviour
         INACTIVE
     }
 
-    public delegate void Callback(Dish dish);
+    public delegate void CallbackDishManager(Dish dish);
+    public delegate void CallbackTable(List<Ingredient> list);
 
-    private Callback m_Callback = null;
+    private CallbackDishManager m_CallbackDishManager = null;
+    private CallbackTable m_CallbackTable = null;
     private FOOD_TYPE m_FoodType = 0;
     private List<Ingredient> m_Ingredients = new List<Ingredient>();
     private DISH_STATE m_State = DISH_STATE.NONE;
@@ -52,7 +54,7 @@ public class Dish : MonoBehaviour
 
     public void OnClick()
     {
-        m_Callback(this);
+        m_CallbackDishManager(this);
     }
 
     // Public region.
@@ -68,23 +70,48 @@ public class Dish : MonoBehaviour
             return;
         }
 
+        int lastIndex = m_Ingredients.Count - 1;
+        if(0 <= lastIndex)
+        {
+            if (m_Ingredients[lastIndex].GetIngredientType() >= ingredient.GetIngredientType())
+            {
+                Debug.LogWarning("잘못된 재료를 선택했습니다.");
+                return;
+            }
+        }
+
         Debug.Log("Ingrediant name : " + ingredient.GetType());
         m_Ingredients.Add(ingredient);
         GameObject foods = this.transform.Find("Foods").gameObject;
         foreach(Transform food in foods.transform)
         {
             Debug.Log("food name : " + food.name);
-            //if(ingredient.GetType() == )
-            //{
+            Debug.Log("Ingredient type : " + ingredient.GetIngredientType().ToString());
+            if (false == food.name.Contains(ingredient.GetType().ToString()))
+            {
+                continue;
+            }
+
+            if(food.name.ToUpper().Contains(ingredient.GetIngredientType().ToString()))
+            {
                 food.gameObject.SetActive(true);
-            //}
+            }
+        }
+        if(ingredient.GetIngredientType() == Ingredient.INGREDIENT_TYPE.BOT)
+        {
+            m_CallbackTable(m_Ingredients);
+            StartCoroutine(Clear());
         }
     }
 
-
-    public void SetCallback(Callback func)
+    public void SetCallbackDishManager(CallbackDishManager func)
     {
-        m_Callback += func;
+        m_CallbackDishManager += func;
+    }
+
+    public void SetCallbackTable(CallbackTable func)
+    {
+        m_CallbackTable += func;
     }
 
     public void ChangeToActiveState()
@@ -99,8 +126,9 @@ public class Dish : MonoBehaviour
         m_State = DISH_STATE.INACTIVE;
     }
 
-    public void Clear()
+    public IEnumerator Clear()
     {
+        yield return new WaitForSeconds(1.0f);
         GameObject foods = this.transform.Find("Foods").gameObject;
         foreach(Transform food in foods.transform)
         {

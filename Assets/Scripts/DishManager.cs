@@ -27,7 +27,7 @@ public class DishManager : MonoBehaviour
         GameObject dishManager = GameObject.Find("DishManager") as GameObject;
         foreach (Transform dish in dishManager.transform)
         {
-            dish.GetComponent<Dish>().SetCallback(OnChangeDishState);
+            dish.GetComponent<Dish>().SetCallbackDishManager(OnChangeDishState);
         }
     }
 

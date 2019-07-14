@@ -14,7 +14,7 @@ public class Table : MonoBehaviour
         GameObject dishManager = GameObject.Find("DishManager") as GameObject;
         foreach(Transform dish in dishManager.transform)
         {
-            //dish.GetComponent<Dish>().SetCallback(OnServingToGuest);
+            dish.GetComponent<Dish>().SetCallbackTable(OnServingToGuest);
         }
 
         GameObject foods = this.transform.Find("Foods").gameObject;
@@ -40,9 +40,12 @@ public class Table : MonoBehaviour
             GameObject foods = this.transform.Find("Foods").gameObject;
             foreach(Transform childFood in foods.transform)
             {
-                if(food[0].NAME == childFood.name)
+                foreach(Ingredient ingredient in food)
                 {
-                    childFood.gameObject.SetActive(true);
+                    if (childFood.name.Contains(ingredient.GetType().ToString()))
+                    {
+                        childFood.gameObject.SetActive(true);
+                    }
                 }
             }
         }
@@ -62,18 +65,17 @@ public class Table : MonoBehaviour
     // Private region.
     private bool CheckCorrectFood(List<Ingredient> food)
     {
-        bool isCorrectFood = false;
-        //for(int i = 0; i < m_Macaroon.Count; ++i)
-        //{
-        //    if(m_Macaroon[i] == food[i])
-        //    {
-        //        continue;
-        //    }
+        if(3 != food.Count)
+        {
+            return false;
+        }
 
-        //    isCorrectFood = false;
-        //    break;
-        //}
-        if(0 >= food.Count)
+        if(food[0].GetType() != food[1].GetType())
+        {
+            return false;
+        }
+
+        if(food[0].GetType() != food[2].GetType())
         {
             return false;
         }
