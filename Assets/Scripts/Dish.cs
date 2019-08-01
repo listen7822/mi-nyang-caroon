@@ -32,11 +32,8 @@ public class Dish : MonoBehaviour
         m_State = DISH_STATE.INACTIVE;
         GameObject trayManager = GameObject.Find("TrayManager") as GameObject;
         foreach (Transform tray in trayManager.transform)
-        { 
-            foreach(Transform ingrediant in tray.transform)
-            {
-                ingrediant.GetComponent<Ingredient>().SetCallback(OnSettingIngredient);
-            }
+        {
+            tray.GetComponent<IngredientsManager>().SetCallback(OnSettingIngredient);
         }
 
         GameObject foods = this.transform.Find("Foods").gameObject;
@@ -63,11 +60,11 @@ public class Dish : MonoBehaviour
         m_FoodType = FOOD_TYPE.MACAROON;
     }
 
-    public void OnSettingIngredient(Ingredient ingredient)
+    public bool OnSettingIngredient(Ingredient ingredient)
     {
         if(DISH_STATE.ACTIVE != m_State)
         {
-            return;
+            return false;
         }
 
         int lastIndex = m_Ingredients.Count - 1;
@@ -76,7 +73,7 @@ public class Dish : MonoBehaviour
             if (m_Ingredients[lastIndex].GetIngredientType() >= ingredient.GetIngredientType())
             {
                 Debug.LogWarning("잘못된 재료를 선택했습니다.");
-                return;
+                return false;
             }
         }
 
@@ -102,6 +99,8 @@ public class Dish : MonoBehaviour
             m_CallbackTable(m_Ingredients);
             StartCoroutine(Clear());
         }
+
+        return true;
     }
 
     public void SetCallbackDishManager(CallbackDishManager func)

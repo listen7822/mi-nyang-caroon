@@ -8,6 +8,8 @@ public class IngredientsManager : MonoBehaviour
     const int OFFSET = 10;
     const int MAX_COUNT = 7;
     public GameObject m_Ingredient;
+    public delegate bool Callback(Ingredient ingredient);
+    private Callback m_Callback = null;
 
 
     // Start is called before the first frame update
@@ -29,17 +31,14 @@ public class IngredientsManager : MonoBehaviour
             if (0 == nIndex % 3)
             {
                 ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.TOP);
-                ingredient.GetComponentInChildren<Text>().text = "M_Top";
             }
             else if(1 == nIndex % 3)
             {
                 ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.MID);
-                ingredient.GetComponentInChildren<Text>().text = "M_Mid";
             }
             else if(2 == nIndex % 3)
             {
                 ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.BOT);
-                ingredient.GetComponentInChildren<Text>().text = "M_Bot";
             }
             ++nIndex;
         }
@@ -49,5 +48,21 @@ public class IngredientsManager : MonoBehaviour
     void Update()
     {
                 
+    }
+
+    public void ChangeIngredient(GameObject ingredient)
+    {
+        if(false == m_Callback(ingredient.GetComponent<Ingredient>()))
+        {
+            return;
+        }
+
+        Destroy(ingredient.GetComponent<Ingredient>());
+        ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.BOT);
+    }
+
+    public void SetCallback(Callback func)
+    {
+        m_Callback += func;
     }
 }

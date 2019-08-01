@@ -13,10 +13,9 @@ public class Ingredient : MonoBehaviour
         BOT
     }
 
-    public delegate void Callback(Ingredient ingredient);
 
-    private Callback m_Callback = null;
     private Button m_Button = null;
+    private IngredientsManager m_IngredientsManager = null;
     [SerializeField]
     protected INGREDIENT_TYPE m_Type = INGREDIENT_TYPE.NONE;
 
@@ -26,6 +25,7 @@ public class Ingredient : MonoBehaviour
         Debug.Log("Ingredient");
         m_Button = GetComponent<Button>();
         m_Button.onClick.AddListener(OnClick);
+        m_IngredientsManager = gameObject.transform.parent.GetComponent<IngredientsManager>();
     }
 
     // Update is called once per frame
@@ -37,7 +37,7 @@ public class Ingredient : MonoBehaviour
     public void OnClick()
     {
         Debug.Log("Click");
-        m_Callback(this);
+        m_IngredientsManager.ChangeIngredient(this.gameObject);
     }
 
     public INGREDIENT_TYPE GetIngredientType()
@@ -48,10 +48,18 @@ public class Ingredient : MonoBehaviour
     public void SetIngredientType(INGREDIENT_TYPE type)
     {
         m_Type = type;
-    }
 
-    public void SetCallback(Callback func)
-    {
-        m_Callback += func;
+        if(INGREDIENT_TYPE.TOP == type)
+        {
+            this.GetComponentInChildren<Text>().text = "M_Top";
+        }
+        else if(INGREDIENT_TYPE.MID == type)
+        {
+            this.GetComponentInChildren<Text>().text = "M_Mid";
+        }
+        else if(INGREDIENT_TYPE.BOT == type)
+        {
+            this.GetComponentInChildren<Text>().text = "M_Bot";
+        }
     }
 }
