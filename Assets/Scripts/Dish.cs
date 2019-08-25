@@ -10,7 +10,7 @@ public class Dish : MonoBehaviour
         MACAROON = 1
     }
 
-    enum DISH_STATE
+    public enum DISH_STATE
     {
         NONE = 0,
         ACTIVE,
@@ -18,10 +18,10 @@ public class Dish : MonoBehaviour
     }
 
     public delegate void CallbackDishManager(Dish dish);
-    public delegate void CallbackTable(List<Ingredient> list);
+    public delegate void CallbackStaff(List<Ingredient> list);
 
     private CallbackDishManager m_CallbackDishManager = null;
-    private CallbackTable m_CallbackTable = null;
+    private CallbackStaff m_CallbackStaff = null;
     private FOOD_TYPE m_FoodType = 0;
     private List<Ingredient> m_Ingredients = new List<Ingredient>();
     private DISH_STATE m_State = DISH_STATE.NONE;
@@ -52,6 +52,12 @@ public class Dish : MonoBehaviour
     public void OnClick()
     {
         m_CallbackDishManager(this);
+    }
+
+    public Food SetIngrediant(Ingredient ingredient)
+    {
+        // 넘어온 재료를 보고 완성이 되었으면 Food를 리턴 아니면 null.
+        return null;
     }
 
     // Public region.
@@ -96,7 +102,7 @@ public class Dish : MonoBehaviour
         }
         if(ingredient.GetIngredientType() == Ingredient.INGREDIENT_TYPE.BOT)
         {
-            m_CallbackTable(m_Ingredients);
+            m_CallbackStaff(m_Ingredients);
             StartCoroutine(Clear());
         }
 
@@ -108,9 +114,9 @@ public class Dish : MonoBehaviour
         m_CallbackDishManager += func;
     }
 
-    public void SetCallbackTable(CallbackTable func)
+    public void SetCallbackStaff(CallbackStaff func)
     {
-        m_CallbackTable += func;
+        m_CallbackStaff += func;
     }
 
     public void ChangeToActiveState()
@@ -123,6 +129,11 @@ public class Dish : MonoBehaviour
     {
         Debug.Log("Inactive");
         m_State = DISH_STATE.INACTIVE;
+    }
+
+    public DISH_STATE GetState()
+    {
+        return m_State;
     }
 
     public IEnumerator Clear()

@@ -37,7 +37,8 @@ public class Ingredient : MonoBehaviour
     public void OnClick()
     {
         Debug.Log("Click");
-        m_IngredientsManager.ChangeIngredient(this.gameObject);
+        //m_IngredientsManager.ChangeIngredient(this.gameObject);
+        m_IngredientsManager.SelectedIngrediant(this);
     }
 
     public INGREDIENT_TYPE GetIngredientType()

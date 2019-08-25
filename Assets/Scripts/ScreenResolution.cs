@@ -6,6 +6,6 @@ public class ScreenResolution : MonoBehaviour
 {
     void Awake()
     {
-        Screen.SetResolution(1920, 1080, true);
+        //Screen.SetResolution(800, 600, true);
     }
 }

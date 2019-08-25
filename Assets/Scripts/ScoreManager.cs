@@ -13,7 +13,7 @@ public class ScoreManager : MonoBehaviour
         GameObject tableManager = GameObject.Find("TableManager") as GameObject;
         foreach (Transform table in tableManager.transform)
         {
-            table.GetComponent<Table>().SetCallback(OnGetPoint);
+            //table.GetComponent<Table>().SetCallback(OnGetPoint);
         }
         m_Text = GetComponentInChildren<Text>();
     }

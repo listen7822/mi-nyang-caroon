@@ -5,6 +5,7 @@ using UnityEngine;
 public class TableManager : MonoBehaviour
 {
     public GameObject m_Table;
+    private static List<GameObject> m_Tables = new List<GameObject>();
     const int X_TABLE_COUNT = 2;
     const int Y_TABLE_COUNT = 2;
     // Start is called before the first frame update
@@ -27,6 +28,24 @@ public class TableManager : MonoBehaviour
             nIndexX = 0;
             ++nIndexY;
         }
+    }
+
+    public void OnServed(int tableIndex, Food food)
+    {
+        if(true == m_Tables[tableIndex].GetComponent<Table>().SetFoodOnTable(food))
+        {
+            // GuestManager에게 음식이 도착했음을 알린다.
+        }
+    }
+
+    public void OnFinishToEat(int tableIndex)
+    {
+        m_Tables[tableIndex].GetComponent<Table>().Clear();
+    }
+
+    public static Vector2 GetTablePos(int index)
+    {
+        return m_Tables[index].GetComponent<Transform>().localPosition;
     }
 
     // Update is called once per frame

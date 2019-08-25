@@ -65,4 +65,10 @@ public class IngredientsManager : MonoBehaviour
     {
         m_Callback += func;
     }
+
+    public void SelectedIngrediant(Ingredient ingredient)
+    {
+        // DishManager에 재료가 선택되었음을 알려준다 OnSetIngrediant.
+
+    }
 }

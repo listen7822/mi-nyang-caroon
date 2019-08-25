@@ -6,7 +6,7 @@ public class DishManager : MonoBehaviour
 {
     public GameObject m_Dish;
 
-    private Dish m_ActiveDish = null;
+    private List<GameObject> m_Dishes = new List<GameObject>();
     const int DISH_COUNT = 3;
 
     // Start is called before the first frame update
@@ -21,6 +21,7 @@ public class DishManager : MonoBehaviour
             GameObject dish = GameObject.Instantiate(m_Dish) as GameObject;
             dish.transform.localPosition = new Vector2(nIndexX * spaceThatOneObjectCanUse.x, 0);
             dish.transform.SetParent(this.transform, false);
+            m_Dishes.Add(dish);
             ++nIndexX;
         }
 
@@ -37,16 +38,36 @@ public class DishManager : MonoBehaviour
         
     }
 
-    void OnChangeDishState(Dish dish)
+    public void SelectedDish(Dish selecedDish)
     {
-        if(null != m_ActiveDish)
+        foreach(GameObject dish in m_Dishes)
         {
-            m_ActiveDish.Clear();
-            m_ActiveDish.ChangeToInActiveState();
+            if(Dish.DISH_STATE.ACTIVE == dish.GetComponent<Dish>().GetState())
+            {
+                dish.GetComponent<Dish>().ChangeToInActiveState();
+            }
         }
 
-        dish.ChangeToActiveState();
-        dish.Clear();
-        m_ActiveDish = dish;
+        selecedDish.ChangeToActiveState();
+    }
+
+    public void OnSetIngrediant(Ingredient ingredient)
+    {
+        foreach(GameObject dish in m_Dishes)
+        {
+            if (Dish.DISH_STATE.ACTIVE == dish.GetComponent<Dish>().GetState())
+            {
+                Food food = dish.GetComponent<Dish>().SetIngrediant(ingredient);
+                if(null != food)
+                {
+                    int index = m_Dishes.IndexOf(dish);
+                    // StaffManager에 OnReadyFood 함수로 완성된 접시 index와 food를 넘긴다.
+                }
+            }
+        }
+    }
+
+    void OnChangeDishState(Dish dish)
+    {
     }
 }

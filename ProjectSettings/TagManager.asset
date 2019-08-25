@@ -41,3 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Guest
+    uniqueID: 3707501755
+    locked: 0
+  - name: Table
+    uniqueID: 3300096223
+    locked: 0
