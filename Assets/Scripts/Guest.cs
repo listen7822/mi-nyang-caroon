@@ -33,6 +33,11 @@ public class Guest : MonoBehaviour
         return m_State;
     }
 
+    public void SetState(STATE state)
+    {
+        m_State = state;
+    }
+
     public int GetTableIndex()
     {
         return m_TableIndex;
@@ -44,10 +49,10 @@ public class Guest : MonoBehaviour
         return 100;
     }
 
-    public bool Leave()
+    public void Leave()
     {
         // 나가기 애니매이션 후 true 리턴.
-        return true;
+        Clear();
     }
 
     public void Clear()
@@ -56,32 +61,39 @@ public class Guest : MonoBehaviour
         m_TableIndex = 0;
     }
 
-    public Food GoToTable(int index)
+    public void GoToTable(int index)
     {
         // 손님이 선호하는 음식 전달.
-        Vector2 pos = TableManager.GetTablePos(index);
+        Vector2 pos = TableManager.Instance().GetTablePos(index);
         // pos 위치로 이동하는 애니메이션 후 다도착하면 음식 주문.
-        return new Food();
+        Debug.Log("손님 이동 시작");
+        OnPath1(index);
     }
 
-    void OnEnable()
+    void OnPath1(int tableIndex)
     {
         iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(gameObject.transform.localPosition.x, -215, 0),
             "isLocal", true, "easeType", iTween.EaseType.linear,
-            "oncomplete", "OnPath1", "oncompletetarget", gameObject));
+            "oncomplete", "OnPath2", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
     }
 
-    void OnPath1()
+    void OnPath2(int tableIndex)
     {
         iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(641, -215, 0),
            "isLocal", true, "easeType", iTween.EaseType.linear,
-           "oncomplete", "OnPath2", "oncompletetarget", gameObject));
+           "oncomplete", "OnPath3", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
     }
 
-    void OnPath2()
+    void OnPath3(int tableIndex)
     {
         iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(641, -100, 0),
            "isLocal", true, "easeType", iTween.EaseType.linear,
-           "oncomplete", "OnArriveToCustomer", "oncompletetarget", gameObject));
+           "oncomplete", "OnArrivedTable", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
+    }
+
+    void OnArrivedTable(int tableIdex)
+    {
+        Debug.Log("손님이 테이블에 도착했습니다.");
+        GuestManager.Instance().ArrivedTable(Ingredient.FOOD_TYPE.MACARRON, tableIdex);
     }
 }

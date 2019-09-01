@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class Table : MonoBehaviour
 {
-    private List<Ingredient> m_Macaroon = new List<Ingredient>();
-    public delegate void Callback(int point);
-    private Callback m_Callback = null;
+    public enum STATE
+    {
+        NONE = 0,
+        EMPTY = 1,
+        USED = 2
+    };
+
     private int m_Score = 0;
     private TableManager m_TableManger = null;
+    private int m_index = 0;
+    private STATE m_State = STATE.NONE;
     // Start is called before the first frame update
     void Start()
     {
-        GameObject staffManager = GameObject.Find("StaffManager") as GameObject;
-        foreach(Transform staff in staffManager.transform)
-        {
-            staff.GetComponent<Staff>().SetCallbackTable(OnServingToGuest);
-        }
-
         GameObject foods = this.transform.Find("Foods").gameObject;
         foreach(Transform food in foods.transform)
         {
@@ -35,7 +35,27 @@ public class Table : MonoBehaviour
         
     }
 
-    public bool SetFoodOnTable(Food food)
+    public STATE GetState()
+    {
+        return m_State;
+    }
+
+    public void SetState(STATE state)
+    {
+        m_State = state;
+    }
+
+    public int GetIndex()
+    {
+        return m_index;
+    }
+
+    public void SetIndex(int index)
+    {
+        m_index = index;
+    }
+
+    public bool SetFoodOnTable(Ingredient.FOOD_TYPE foodType)
     {
         // 테이블에 음식에 맞는 이미지를 띄운다.
         return true;
@@ -62,17 +82,6 @@ public class Table : MonoBehaviour
         }
     }
 
-    public void SetCallback(Callback func)
-    {
-        m_Callback += func;
-    }
-
-    public void OnClick()
-    {
-        m_Callback(m_Score);
-        Clear();
-    }
-
     // Private region.
     private bool CheckCorrectFood(List<Ingredient> food)
     {
@@ -97,7 +106,7 @@ public class Table : MonoBehaviour
         return true;
     }
 
-    public void Clear()
+    public void ClearTable()
     {
         //m_Score = 0;
         //GameObject foods = this.transform.Find("Foods").gameObject;
@@ -106,4 +115,5 @@ public class Table : MonoBehaviour
         //    childFood.gameObject.SetActive(false);
         //}
     }
+
 }

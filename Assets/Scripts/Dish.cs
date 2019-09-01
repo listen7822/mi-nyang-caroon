@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class Dish : MonoBehaviour
 {
-    enum FOOD_TYPE
-    {
-        NONE = 0,
-        MACAROON = 1
-    }
-
     public enum DISH_STATE
     {
         NONE = 0,
@@ -17,106 +11,82 @@ public class Dish : MonoBehaviour
         INACTIVE
     }
 
-    public delegate void CallbackDishManager(Dish dish);
-    public delegate void CallbackStaff(List<Ingredient> list);
-
-    private CallbackDishManager m_CallbackDishManager = null;
-    private CallbackStaff m_CallbackStaff = null;
-    private FOOD_TYPE m_FoodType = 0;
-    private List<Ingredient> m_Ingredients = new List<Ingredient>();
+    private Ingredient.FOOD_TYPE m_FoodType = 0;
+    private Dictionary<Ingredient.FOOD_TYPE, List<Ingredient.INGREDIENT_TYPE>> m_IngrediantDic
+        = new Dictionary<Ingredient.FOOD_TYPE, List<Ingredient.INGREDIENT_TYPE>>();
     private DISH_STATE m_State = DISH_STATE.NONE;
+    private int m_Index = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         m_State = DISH_STATE.INACTIVE;
         GameObject trayManager = GameObject.Find("TrayManager") as GameObject;
-        foreach (Transform tray in trayManager.transform)
-        {
-            tray.GetComponent<IngredientsManager>().SetCallback(OnSettingIngredient);
-        }
-
         GameObject foods = this.transform.Find("Foods").gameObject;
         foreach(Transform food in foods.transform)
         {
             food.gameObject.SetActive(false);
         }
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        GameObject ingrediants = this.transform.Find("Ingrediants").gameObject;
+        foreach(Transform ingrediant in ingrediants.transform)
+        {
+            ingrediant.gameObject.SetActive(false);
+        }
     }
 
     public void OnClick()
     {
-        m_CallbackDishManager(this);
+        DishManager.Instance().SelectedDish(m_Index);
     }
 
-    public Food SetIngrediant(Ingredient ingredient)
+    public void SetIndex(int index)
     {
-        // 넘어온 재료를 보고 완성이 되었으면 Food를 리턴 아니면 null.
-        return null;
+        m_Index = index;
     }
 
-    // Public region.
-    public void OnChooseFoodType()
+    public int GetIndex()
     {
-        m_FoodType = FOOD_TYPE.MACAROON;
+        return m_Index;
     }
 
-    public bool OnSettingIngredient(Ingredient ingredient)
+    public bool SetIngrediant(Ingredient.FOOD_TYPE foodType, Ingredient.INGREDIENT_TYPE ingrediantType)
     {
+        // Check 함수로 뺼까 말까?
         if(DISH_STATE.ACTIVE != m_State)
         {
             return false;
         }
 
-        int lastIndex = m_Ingredients.Count - 1;
-        if(0 <= lastIndex)
+        if(false == m_IngrediantDic.ContainsKey(foodType))
         {
-            if (m_Ingredients[lastIndex].GetIngredientType() >= ingredient.GetIngredientType())
-            {
-                Debug.LogWarning("잘못된 재료를 선택했습니다.");
-                return false;
-            }
+            List<Ingredient.INGREDIENT_TYPE> tmpList = new List<Ingredient.INGREDIENT_TYPE>();
+            tmpList.Add(ingrediantType);
+            m_IngrediantDic.Add(foodType, tmpList);
+
+            return false;
         }
 
-        Debug.Log("Ingrediant name : " + ingredient.GetType());
-        m_Ingredients.Add(ingredient);
-        GameObject foods = this.transform.Find("Foods").gameObject;
-        foreach(Transform food in foods.transform)
+        if(true == m_IngrediantDic[foodType].Contains(ingrediantType))
         {
-            Debug.Log("food name : " + food.name);
-            Debug.Log("Ingredient type : " + ingredient.GetIngredientType().ToString());
-            if (false == food.name.Contains(ingredient.GetType().ToString()))
-            {
-                continue;
-            }
-
-            if(food.name.ToUpper().Contains(ingredient.GetIngredientType().ToString()))
-            {
-                food.gameObject.SetActive(true);
-            }
+            Debug.LogWarning("잘못된 재료를 선택했습니다.");
+            return false;
         }
-        if(ingredient.GetIngredientType() == Ingredient.INGREDIENT_TYPE.BOT)
+
+        m_IngrediantDic[foodType].Add(ingrediantType);
+        if(3 != m_IngrediantDic[foodType].Count)
         {
-            m_CallbackStaff(m_Ingredients);
-            StartCoroutine(Clear());
+            return false;
+        }
+
+        Debug.Log("요리가 만들어졌습니다.");
+        GameObject ingrediants = this.transform.Find("Ingrediants").gameObject;
+        foreach(Transform ingrediant in ingrediants.transform)
+        {
+            ingrediant.gameObject.SetActive(true);
         }
 
         return true;
-    }
-
-    public void SetCallbackDishManager(CallbackDishManager func)
-    {
-        m_CallbackDishManager += func;
-    }
-
-    public void SetCallbackStaff(CallbackStaff func)
-    {
-        m_CallbackStaff += func;
     }
 
     public void ChangeToActiveState()
@@ -136,14 +106,14 @@ public class Dish : MonoBehaviour
         return m_State;
     }
 
-    public IEnumerator Clear()
+    public void Clear(Ingredient.FOOD_TYPE foodType)
     {
-        yield return new WaitForSeconds(1.0f);
-        GameObject foods = this.transform.Find("Foods").gameObject;
-        foreach(Transform food in foods.transform)
+        GameObject ingrediants = this.transform.Find("Ingrediants").gameObject;
+        foreach(Transform ingrediant in ingrediants.transform)
         {
-            food.gameObject.SetActive(false);
+            ingrediant.gameObject.SetActive(true);
         }
-        m_Ingredients.Clear();
+
+        m_IngrediantDic[foodType].Clear();
     }
 }

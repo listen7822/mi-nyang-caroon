@@ -7,17 +7,22 @@ public class Ingredient : MonoBehaviour
 {
     public enum INGREDIENT_TYPE
     {
-        NONE,
+        NONE = 0,
         TOP,
         MID,
         BOT
-    }
+    };
 
+    public enum FOOD_TYPE
+    {
+        NONE = 0,
+        MACARRON = 1
+    };
 
     private Button m_Button = null;
-    private IngredientsManager m_IngredientsManager = null;
     [SerializeField]
-    protected INGREDIENT_TYPE m_Type = INGREDIENT_TYPE.NONE;
+    protected INGREDIENT_TYPE m_IngrediantType = INGREDIENT_TYPE.NONE;
+    protected FOOD_TYPE m_FoodType = FOOD_TYPE.NONE;
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +30,6 @@ public class Ingredient : MonoBehaviour
         Debug.Log("Ingredient");
         m_Button = GetComponent<Button>();
         m_Button.onClick.AddListener(OnClick);
-        m_IngredientsManager = gameObject.transform.parent.GetComponent<IngredientsManager>();
     }
 
     // Update is called once per frame
@@ -38,29 +42,41 @@ public class Ingredient : MonoBehaviour
     {
         Debug.Log("Click");
         //m_IngredientsManager.ChangeIngredient(this.gameObject);
-        m_IngredientsManager.SelectedIngrediant(this);
+        IngredientsManager.Instance().SelectedIngrediant(m_FoodType, m_IngrediantType);
+        SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.BOT);
     }
 
     public INGREDIENT_TYPE GetIngredientType()
     {
-        return m_Type;
+        return m_IngrediantType;
     }
 
-    public void SetIngredientType(INGREDIENT_TYPE type)
+    public void SetIngredientType(FOOD_TYPE foodType,INGREDIENT_TYPE ingrediantType)
     {
-        m_Type = type;
+        m_IngrediantType = ingrediantType;
+        m_FoodType = foodType;
 
-        if(INGREDIENT_TYPE.TOP == type)
+        if(INGREDIENT_TYPE.TOP == ingrediantType)
         {
             this.GetComponentInChildren<Text>().text = "M_Top";
         }
-        else if(INGREDIENT_TYPE.MID == type)
+        else if(INGREDIENT_TYPE.MID == ingrediantType)
         {
             this.GetComponentInChildren<Text>().text = "M_Mid";
         }
-        else if(INGREDIENT_TYPE.BOT == type)
+        else if(INGREDIENT_TYPE.BOT == ingrediantType)
         {
             this.GetComponentInChildren<Text>().text = "M_Bot";
         }
+    }
+
+    public FOOD_TYPE GetFoodType()
+    {
+        return m_FoodType;
+    }
+
+    public void SetFoodType(FOOD_TYPE foodType)
+    {
+        m_FoodType = foodType;
     }
 }

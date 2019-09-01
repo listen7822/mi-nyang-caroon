@@ -40,6 +40,6 @@ public class EntranceManager : MonoBehaviour
     private IEnumerator ActiveGuest()
     {
         yield return new WaitForSeconds(3.0f);
-        m_Children[0].SetActive(true);
+        //    m_Children[0].SetActive(true);
     }
 }

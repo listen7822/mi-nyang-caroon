@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class IngredientsManager : MonoBehaviour
+public class IngredientsManager : MonoSingleton<IngredientsManager>
 {
     const int OFFSET = 10;
     const int MAX_COUNT = 7;
     public GameObject m_Ingredient;
-    public delegate bool Callback(Ingredient ingredient);
+    public delegate void Callback(Ingredient.FOOD_TYPE foodType, Ingredient.INGREDIENT_TYPE ingrediantType);
     private Callback m_Callback = null;
 
 
@@ -30,15 +30,15 @@ public class IngredientsManager : MonoBehaviour
             ingredient.transform.SetParent(this.transform, false);
             if (0 == nIndex % 3)
             {
-                ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.TOP);
+                ingredient.AddComponent<Ingredient>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.TOP);
             }
             else if(1 == nIndex % 3)
             {
-                ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.MID);
+                ingredient.AddComponent<Ingredient>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.MID);
             }
             else if(2 == nIndex % 3)
             {
-                ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.BOT);
+                ingredient.AddComponent<Ingredient>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.BOT);
             }
             ++nIndex;
         }
@@ -50,25 +50,14 @@ public class IngredientsManager : MonoBehaviour
                 
     }
 
-    public void ChangeIngredient(GameObject ingredient)
-    {
-        if(false == m_Callback(ingredient.GetComponent<Ingredient>()))
-        {
-            return;
-        }
-
-        Destroy(ingredient.GetComponent<Ingredient>());
-        ingredient.AddComponent<Macaroon>().SetIngredientType(Ingredient.INGREDIENT_TYPE.BOT);
-    }
-
     public void SetCallback(Callback func)
     {
         m_Callback += func;
     }
 
-    public void SelectedIngrediant(Ingredient ingredient)
+    public void SelectedIngrediant(Ingredient.FOOD_TYPE foodType, Ingredient.INGREDIENT_TYPE ingrediantType)
     {
         // DishManager에 재료가 선택되었음을 알려준다 OnSetIngrediant.
-
+        m_Callback(foodType, ingrediantType);
     }
 }
