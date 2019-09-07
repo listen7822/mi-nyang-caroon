@@ -7,11 +7,11 @@ public class TableManager : MonoSingleton<TableManager>
     const int X_TABLE_COUNT = 2;
     const int Y_TABLE_COUNT = 2;
     private static List<GameObject> m_Tables = new List<GameObject>();
-    private OnArrivedFood m_OnArrivedFood = null;
-    private OnAvailableTable m_OnAvailableTable = null;
+    private ArrivedFood OnArrivedFood = null;
+    private AvailableTable OnAvailableTable = null;
     public GameObject m_Table;
-    public delegate void OnArrivedFood(int tableIndex);
-    public delegate void OnAvailableTable(int tableIndex);
+    public delegate void ArrivedFood(int tableIndex);
+    public delegate void AvailableTable(int tableIndex);
     // Start is called before the first frame update
     void Start()
     {
@@ -19,7 +19,7 @@ public class TableManager : MonoSingleton<TableManager>
         Vector2 spaceThatOneObjectCanUse = new Vector2(hallSize.x / X_TABLE_COUNT, hallSize.y / Y_TABLE_COUNT );
         int indexX = 0;
         int indexY = 0;
-        int tableIndex = 0;
+        int tableIndex = 1;
 
         for (int i = 0; i < Y_TABLE_COUNT; ++i)
         {
@@ -38,8 +38,8 @@ public class TableManager : MonoSingleton<TableManager>
             ++indexY;
         }
 
-        StaffManager.Instance().SetCallback(OnServed);
-        GuestManager.Instance().SetOnFinishToEatCallback(OnFinishToEat);
+        StaffManager.Instance().SetServedCallback(OnServed);
+        GuestManager.Instance().SetFinishToEatCallback(OnFinishToEat);
         StartCoroutine(CheckTableTimer());
     }
 
@@ -47,14 +47,14 @@ public class TableManager : MonoSingleton<TableManager>
     {
         while(true)
         {
-            yield return new WaitForSeconds(3.0f);
             foreach(GameObject table in m_Tables)
             {
+                yield return new WaitForSeconds(3.0f);
                 if(Table.STATE.EMPTY == table.GetComponent<Table>().GetState())
                 {
-                    Debug.Log("CheckTableTimer");
+                    Debug.Log("AvailableTable : " + table.GetComponent<Table>().GetIndex());
                     table.GetComponent<Table>().SetState(Table.STATE.USED);
-                    m_OnAvailableTable(table.GetComponent<Table>().GetIndex());
+                    OnAvailableTable(table.GetComponent<Table>().GetIndex());
                     break;
                 }
             }
@@ -68,20 +68,21 @@ public class TableManager : MonoSingleton<TableManager>
             if(true == table.GetComponent<Table>().SetFoodOnTable(foodType))
             {
                 // GuestManager에게 음식이 도착했음을 알린다.
-                m_OnArrivedFood(tableIndex);
+                OnArrivedFood(tableIndex);
                 break;
             }
         }
     }
 
-    public void SetOnArrivedFoodCallback(OnArrivedFood func)
+
+    public void SetOnArrivedFoodCallback(ArrivedFood func)
     {
-        m_OnArrivedFood += func;
+        OnArrivedFood += func;
     }
 
-    public void SetOnAvailableTableCallback(OnAvailableTable func)
+    public void SetOnAvailableTableCallback(AvailableTable func)
     {
-        m_OnAvailableTable += func;
+        OnAvailableTable += func;
     }
 
     public void OnFinishToEat(int tableIndex)

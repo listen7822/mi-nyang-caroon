@@ -19,16 +19,24 @@ public class Ingredient : MonoBehaviour
         MACARRON = 1
     };
 
+    public delegate void SelectedIngrediant(Ingredient.FOOD_TYPE foodType, Ingredient.INGREDIENT_TYPE ingrediantType);
     private Button m_Button = null;
+    private SelectedIngrediant OnSelectedIngrediant = null;
     [SerializeField]
     protected INGREDIENT_TYPE m_IngrediantType = INGREDIENT_TYPE.NONE;
+    [SerializeField]
     protected FOOD_TYPE m_FoodType = FOOD_TYPE.NONE;
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
         Debug.Log("Ingredient");
         m_Button = GetComponent<Button>();
+        if(null == m_Button)
+        {
+            return;
+        }
+
         m_Button.onClick.AddListener(OnClick);
     }
 
@@ -38,11 +46,14 @@ public class Ingredient : MonoBehaviour
         
     }
 
+    public void SetSelectedIngrediantCallback(SelectedIngrediant func)
+    {
+        OnSelectedIngrediant += func;
+    }
     public void OnClick()
     {
         Debug.Log("Click");
-        //m_IngredientsManager.ChangeIngredient(this.gameObject);
-        IngredientsManager.Instance().SelectedIngrediant(m_FoodType, m_IngrediantType);
+        OnSelectedIngrediant(m_FoodType, m_IngrediantType);
         SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.BOT);
     }
 

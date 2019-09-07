@@ -85,7 +85,6 @@ public class Table : MonoBehaviour
     // Private region.
     private bool CheckCorrectFood(List<Ingredient> food)
     {
-        Debug.LogWarning("food count: " + food.Count);
         if(3 != food.Count)
         {
             return false;
@@ -93,13 +92,11 @@ public class Table : MonoBehaviour
 
         if(food[0].GetType() != food[1].GetType())
         {
-            Debug.LogWarning("1 ");
             return false;
         }
 
         if(food[0].GetType() != food[2].GetType())
         {
-            Debug.LogWarning("2 ");
             return false;
         }
 
@@ -114,6 +111,7 @@ public class Table : MonoBehaviour
         //{
         //    childFood.gameObject.SetActive(false);
         //}
+        m_State = STATE.EMPTY;
     }
 
 }

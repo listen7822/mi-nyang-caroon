@@ -5,11 +5,11 @@ using UnityEngine;
 public class StaffManager : MonoSingleton<StaffManager>
 {
     public GameObject m_Staff = null;
-    public delegate void Callback(Ingredient.FOOD_TYPE foodType, int tableIndex);
-    public delegate void OnClearDishCallback(Ingredient.FOOD_TYPE foodType, int dishIndex);
+    public delegate void OnServed(Ingredient.FOOD_TYPE foodType, int tableIndex);
+    public delegate void ClearDishCallback(Ingredient.FOOD_TYPE foodType, int dishIndex);
 
-    private Callback m_Callback = null;
-    private OnClearDishCallback m_OnClearDishCallback = null;
+    private OnServed OnServedCallback = null;
+    private ClearDishCallback OnClearDishCallback = null;
     private List<GameObject> m_StaffList = new List<GameObject>();
     private Dictionary<int, Ingredient.FOOD_TYPE> m_OrderedDic = new Dictionary<int, Ingredient.FOOD_TYPE>();
     private Dictionary<int, Ingredient.FOOD_TYPE> m_ReadyDic = new Dictionary<int, Ingredient.FOOD_TYPE>();
@@ -20,9 +20,10 @@ public class StaffManager : MonoSingleton<StaffManager>
         staff.transform.localPosition = new Vector2(0, 0);
         staff.transform.SetParent(this.transform, false);
         staff.GetComponent<Staff>().SetState(Staff.STATE.WAITING);
+        staff.GetComponent<Staff>().OnSetServingIsDoneCallback(OnServingIsDone);
         m_StaffList.Add(staff);
         GuestManager.Instance().SetOnGetOrderCallback(OnGetOrder);
-        DishManager.Instance().SetCallback(OnReadyFood);
+        DishManager.Instance().SetReadyFoodCallback(OnReadyFood);
         StartCoroutine(OnCheckTimer());
     }
 
@@ -34,37 +35,48 @@ public class StaffManager : MonoSingleton<StaffManager>
             int tableIndex = 0;
             int dishIndex = 0;
             Ingredient.FOOD_TYPE foodType = Ingredient.FOOD_TYPE.NONE;
-            if(true == Check(out foodType, out tableIndex, out dishIndex))
+            if (false == Check(out foodType, out tableIndex, out dishIndex))
             {
-                foreach(GameObject staff in m_StaffList)
-                {
-                    if(Staff.STATE.SERVING == staff.GetComponent<Staff>().GetState())
-                    {
-                        continue;
-                    }
+                continue;
+            }
 
-                    Debug.Log("서빙 시작!");
-                    staff.GetComponent<Staff>().SetState(Staff.STATE.SERVING);
-                    staff.GetComponent<Staff>().Serving(foodType, tableIndex);
-                    m_OnClearDishCallback(foodType, dishIndex);
+            foreach(GameObject staff in m_StaffList)
+            {
+                if(Staff.STATE.SERVING == staff.GetComponent<Staff>().GetState())
+                {
+                    continue;
                 }
+
+                Debug.Log("서빙 시작!");
+                staff.GetComponent<Staff>().SetState(Staff.STATE.SERVING);
+                staff.GetComponent<Staff>().Serving(foodType, tableIndex);
+                OnClearDishCallback(foodType, dishIndex);
             }
         }
     }
 
-    public void ServingIsDone(Ingredient.FOOD_TYPE foodType, int tableIndex)
+    public void OnServingIsDone(Ingredient.FOOD_TYPE foodType, int tableIndex)
     {
-        m_Callback(foodType, tableIndex);
+        OnServedCallback(foodType, tableIndex);
+        foreach(GameObject staff in m_StaffList)
+        {
+            if(Staff.STATE.WAITING == staff.GetComponent<Staff>().GetState())
+            {
+                continue;
+            }
+
+            staff.GetComponent<Staff>().ReturnToWaitingPos();
+        }
     }
 
-    public void SetCallback(Callback func)
+    public void SetServedCallback(OnServed func)
     {
-        m_Callback += func;
+        OnServedCallback += func;
     }
 
-    public void SetOnClearDishCallback(OnClearDishCallback func)
+    public void SetClearDishCallback(ClearDishCallback func)
     {
-        m_OnClearDishCallback += func;
+        OnClearDishCallback += func;
     }
 
     public void OnGetOrder(Ingredient.FOOD_TYPE foodType, int tableIndex)
@@ -75,6 +87,7 @@ public class StaffManager : MonoSingleton<StaffManager>
             return;
         }
 
+        Debug.Log("TableIndex : " + tableIndex);
         m_OrderedDic.Add(tableIndex, foodType);
     }
 
@@ -86,6 +99,7 @@ public class StaffManager : MonoSingleton<StaffManager>
             return;
         }
 
+        Debug.Log("DishIndex : " + dishIndex);
         m_ReadyDic.Add(dishIndex, foodType);
     }
 
@@ -97,8 +111,18 @@ public class StaffManager : MonoSingleton<StaffManager>
         // foreach 정리가 필요함.
         foreach (KeyValuePair<int, Ingredient.FOOD_TYPE> orderedFood in m_OrderedDic)
         {
+            if(Ingredient.FOOD_TYPE.NONE == orderedFood.Value)
+            {
+                continue;
+            }
+
             foreach(KeyValuePair<int, Ingredient.FOOD_TYPE> readyFood in m_ReadyDic)
             {
+                if(Ingredient.FOOD_TYPE.NONE == readyFood.Value)
+                {
+                    continue;
+                }
+
                 if(orderedFood.Value == readyFood.Value)
                 {
                     foodType = readyFood.Value;

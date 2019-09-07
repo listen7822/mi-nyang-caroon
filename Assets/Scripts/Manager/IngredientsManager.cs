@@ -5,44 +5,13 @@ using UnityEngine.UI;
 
 public class IngredientsManager : MonoSingleton<IngredientsManager>
 {
-    const int OFFSET = 10;
-    const int MAX_COUNT = 7;
-    public GameObject m_Ingredient;
-    public delegate void Callback(Ingredient.FOOD_TYPE foodType, Ingredient.INGREDIENT_TYPE ingrediantType);
-    private Callback m_Callback = null;
+    public delegate void SetIngrediant(Ingredient.FOOD_TYPE foodType, Ingredient.INGREDIENT_TYPE ingrediantType);
+    private SetIngrediant OnSetIngrediant = null;
 
-
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        Vector2 traySize;
-        Vector2 ingredientSize = m_Ingredient.GetComponent<RectTransform>().sizeDelta;
-
-        traySize = GetComponent<RectTransform>().sizeDelta;
-        int nSpaceThatOneObjectCanUse = Mathf.FloorToInt(traySize.x / MAX_COUNT);
-        int nCenterOffset = Mathf.FloorToInt((traySize.y - ingredientSize.y) / 2);
-        int nIndex = 0;
-
-        for (int i = 0; i < MAX_COUNT; ++i)
-        {
-            GameObject ingredient = GameObject.Instantiate(m_Ingredient) as GameObject;
-            ingredient.transform.localPosition = new Vector2(nIndex * nSpaceThatOneObjectCanUse, -nCenterOffset);
-            ingredient.transform.SetParent(this.transform, false);
-            if (0 == nIndex % 3)
-            {
-                ingredient.AddComponent<Ingredient>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.TOP);
-            }
-            else if(1 == nIndex % 3)
-            {
-                ingredient.AddComponent<Ingredient>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.MID);
-            }
-            else if(2 == nIndex % 3)
-            {
-                ingredient.AddComponent<Ingredient>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.BOT);
-            }
-            ++nIndex;
-        }
-    } 
+        TrayManager.Instance().SetFinishTraySetting(OnFinishTraySetting);
+    }
 
     // Update is called once per frame
     void Update()
@@ -50,14 +19,40 @@ public class IngredientsManager : MonoSingleton<IngredientsManager>
                 
     }
 
-    public void SetCallback(Callback func)
+    void OnFinishTraySetting()
     {
-        m_Callback += func;
+        Tray[] traies = transform.GetComponentsInChildren<Tray>();
+        foreach(Tray tray in traies)
+        {
+            int nIndex = 0;
+            foreach(Transform ingredient in tray.transform)
+            {
+                if (0 == nIndex % 3)
+                {
+                    ingredient.gameObject.AddComponent<MacaroonIngrediant>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.TOP);
+                }
+                else if(1 == nIndex % 3)
+                {
+                    ingredient.gameObject.AddComponent<MacaroonIngrediant>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.MID);
+                }
+                else if(2 == nIndex % 3)
+                {
+                    ingredient.gameObject.AddComponent<MacaroonIngrediant>().SetIngredientType(Ingredient.FOOD_TYPE.MACARRON, Ingredient.INGREDIENT_TYPE.BOT);
+                }
+                ingredient.gameObject.GetComponent<MacaroonIngrediant>().SetSelectedIngrediantCallback(OnSelectedIngrediant);
+                ++nIndex;
+            }
+        }
+    } 
+
+    public void SetIngrediantCallback(SetIngrediant func)
+    {
+        OnSetIngrediant += func;
     }
 
-    public void SelectedIngrediant(Ingredient.FOOD_TYPE foodType, Ingredient.INGREDIENT_TYPE ingrediantType)
+    public void OnSelectedIngrediant(Ingredient.FOOD_TYPE foodType, Ingredient.INGREDIENT_TYPE ingrediantType)
     {
         // DishManager에 재료가 선택되었음을 알려준다 OnSetIngrediant.
-        m_Callback(foodType, ingrediantType);
+        OnSetIngrediant(foodType, ingrediantType);
     }
 }

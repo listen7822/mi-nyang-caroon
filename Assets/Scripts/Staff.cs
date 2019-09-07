@@ -9,8 +9,10 @@ public class Staff : MonoBehaviour
         WAITING = 0,
         SERVING
     }
+    public delegate void ServingIsDone(Ingredient.FOOD_TYPE foodType, int tableIndex);
 
     private STATE m_State = STATE.WAITING;
+    private ServingIsDone OnServingIsDone = null;
     // Start is called before the first frame update
     void Start()
     {
@@ -34,15 +36,29 @@ public class Staff : MonoBehaviour
         m_State = state;
     }
 
+    public void OnSetServingIsDoneCallback(ServingIsDone func)
+    {
+        OnServingIsDone += func;
+    }
+
     public void Serving(Ingredient.FOOD_TYPE foodType, int tableIndex)
     {
         // 애니메이션으로 테이블에 도착하면 true 리턴.,
-        DeliverToCustomer(foodType, tableIndex);
+        DeliverFoodToCustomer(foodType, tableIndex);
     }
 
-    public void DeliverToCustomer(Ingredient.FOOD_TYPE foodType, int tableIndex)
+    public void ReturnToWaitingPos()
+    {
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(0, 0, 0),
+            "isLocal", true, "easeType", iTween.EaseType.linear,
+            "oncomplete", "OnArrivedWaitingPos", "oncompletetarget", gameObject));
+    }
+
+    public void DeliverFoodToCustomer(Ingredient.FOOD_TYPE foodType, int tableIndex)
     {
         // 테이블의 위치를 물어봐야한다...
+        Vector2 pos = TableManager.Instance().GetTablePos(tableIndex);
+
         Hashtable hashtable = new Hashtable();
         hashtable.Add("foodType", foodType);
         hashtable.Add("tableIndex", tableIndex);
@@ -55,7 +71,12 @@ public class Staff : MonoBehaviour
 
     public void OnArriveToCustomer(Hashtable hashtable)
     {
-        Debug.LogWarning("food count : " + (Ingredient.FOOD_TYPE)hashtable["foodType"]);
-        StaffManager.Instance().ServingIsDone((Ingredient.FOOD_TYPE)hashtable["foodType"], (int)hashtable["tableIndex"]);
+        Debug.LogWarning("Serving is Done. : " + (Ingredient.FOOD_TYPE)hashtable["foodType"]);
+        OnServingIsDone((Ingredient.FOOD_TYPE)hashtable["foodType"], (int)hashtable["tableIndex"]);
+    }
+
+    public void OnArrivedWaitingPos()
+    {
+        m_State = STATE.WAITING;
     }
 }
