@@ -1,0 +1,5 @@
+Function,Name,Line,LeftChar,RightChar,MiddleChar,BG,BlackBG,CameraShake
+S,,,Char1,Char2,,BG1,,
+L,왼쪽 캐릭터,대화창 테스트 입니다,,,,,,
+L,오른쪽 캐릭터,카메라 쉐이킹!,,,,,,
+E,,,,,,,,1
