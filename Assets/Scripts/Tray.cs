@@ -14,15 +14,16 @@ public class Tray : MonoBehaviour
         Vector2 ingredientSize = m_Ingredient.GetComponent<RectTransform>().sizeDelta;
 
         traySize = GetComponent<RectTransform>().sizeDelta;
-        int nSpaceThatOneObjectCanUse = Mathf.FloorToInt(traySize.x / MAX_COUNT);
-        int nCenterOffset = Mathf.FloorToInt((traySize.y - ingredientSize.y) / 2);
-        int nIndex = 0;
+        float spaceThatOneObjectCanUse = traySize.x / MAX_COUNT;
+        float spaceBetweenIngrediant = (spaceThatOneObjectCanUse - ingredientSize.x) / 2;
+        int centerOffset = Mathf.FloorToInt((traySize.y - ingredientSize.y) / 2);
+        int index = 0;
         for (int i = 0; i < MAX_COUNT; ++i)
         {
             GameObject ingredient = GameObject.Instantiate(m_Ingredient) as GameObject;
-            ingredient.transform.localPosition = new Vector2(nIndex * nSpaceThatOneObjectCanUse, -nCenterOffset);
+            ingredient.transform.localPosition = new Vector2((index * spaceThatOneObjectCanUse) + spaceBetweenIngrediant, -centerOffset);
             ingredient.transform.SetParent(this.transform, false);
-            ++nIndex;
+            ++index;
         }
 
     }
