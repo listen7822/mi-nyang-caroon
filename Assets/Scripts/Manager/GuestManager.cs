@@ -8,9 +8,11 @@ public class GuestManager : MonoSingleton<GuestManager>
     private const int GUEST_COUNT = 1;
     private List<GameObject> m_Guests = new List<GameObject>();
     private FinishToEatCallback OnFinishToEatCallback = null;
-    private GetOrderCallback OnGetOrderCallback = null;
+    private GetOrderFoodCallback OnGetOrderFoodCallback = null;
+    private GetOrderDrinkCallback OnGetOrderDrinkCallback = null;
     public delegate void FinishToEatCallback(int tableIndex);
-    public delegate void GetOrderCallback(Ingredient.FOOD_TYPE foodType, int tableIndex);
+    public delegate void GetOrderFoodCallback(Ingredient.FOOD_TYPE foodType, int tableIndex);
+    public delegate void GetOrderDrinkCallback(Drink.TYPE drinkType, int tableIndex);
     // Start is called before the first frame update
     void Start()
     {
@@ -23,6 +25,7 @@ public class GuestManager : MonoSingleton<GuestManager>
             guest.SetActive(false);
             guest.GetComponent<Guest>().SetState(Guest.STATE.WAITING_OUTSIDE);
             guest.GetComponent<Guest>().SetOrderFoodCallback(OnOrederFood);
+            guest.GetComponent<Guest>().SetOrderDrinkCallback(OnOrederDrink);
             m_Guests.Add(guest);
         }
 
@@ -37,9 +40,14 @@ public class GuestManager : MonoSingleton<GuestManager>
         
     }
 
-    public void SetOnGetOrderCallback(GetOrderCallback func)
+    public void SetOnGetOrderFoodCallback(GetOrderFoodCallback func)
     {
-        OnGetOrderCallback += func;
+        OnGetOrderFoodCallback += func;
+    }
+
+    public void SetOnGetOrderDrinkCallback(GetOrderDrinkCallback func)
+    {
+        OnGetOrderDrinkCallback += func;
     }
 
     public void SetFinishToEatCallback(FinishToEatCallback func)
@@ -49,7 +57,12 @@ public class GuestManager : MonoSingleton<GuestManager>
 
     public void OnOrederFood(Ingredient.FOOD_TYPE food, int tableIndex)
     {
-        OnGetOrderCallback(food, tableIndex);
+        OnGetOrderFoodCallback(food, tableIndex);
+    }
+
+    public void OnOrederDrink(Drink.TYPE drink, int tableIndex)
+    {
+        OnGetOrderDrinkCallback(drink, tableIndex);
     }
 
     public void OnAvailableTable(int tableIndex)

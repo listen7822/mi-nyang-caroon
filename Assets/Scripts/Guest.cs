@@ -13,7 +13,9 @@ public class Guest : MonoBehaviour
     private int m_TableIndex = 0;
     private Food m_OrderedFood;
     private OrderFood OnOrderFood = null;
+    private OrderDrink OnOrderDrink = null;
     public delegate void OrderFood(Ingredient.FOOD_TYPE foodType, int tableIndex);
+    public delegate void OrderDrink(Drink.TYPE drinkType, int tableIndex);
 
     private STATE m_State = STATE.WAITING_OUTSIDE;
     // Start is called before the first frame update
@@ -60,6 +62,11 @@ public class Guest : MonoBehaviour
         OnOrderFood += func;
     }
 
+    public void SetOrderDrinkCallback(OrderDrink func)
+    {
+        OnOrderDrink += func;
+    }
+
     public void GoToTable(int index)
     {
         // 손님이 선호하는 음식 전달.
@@ -95,5 +102,6 @@ public class Guest : MonoBehaviour
     {
         Debug.Log("손님이 테이블에 도착했습니다.");
         OnOrderFood(Ingredient.FOOD_TYPE.MACARRON, tableIdex);
+        OnOrderDrink(Drink.TYPE.COFFEE, tableIdex);
     }
 }

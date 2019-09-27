@@ -11,8 +11,10 @@ public class StaffManager : MonoSingleton<StaffManager>
     private OnServed OnServedCallback = null;
     private ClearDishCallback OnClearDishCallback = null;
     private List<GameObject> m_StaffList = new List<GameObject>();
-    private Dictionary<int, Ingredient.FOOD_TYPE> m_OrderedDic = new Dictionary<int, Ingredient.FOOD_TYPE>();
-    private Dictionary<int, Ingredient.FOOD_TYPE> m_ReadyDic = new Dictionary<int, Ingredient.FOOD_TYPE>();
+    private Dictionary<int, Ingredient.FOOD_TYPE> m_OrderedFoodDic = new Dictionary<int, Ingredient.FOOD_TYPE>();
+    private Dictionary<int, Drink.TYPE> m_OrderedDrinkDic = new Dictionary<int, Drink.TYPE>();
+    private Dictionary<int, Ingredient.FOOD_TYPE> m_ReadyFoodDic = new Dictionary<int, Ingredient.FOOD_TYPE>();
+    private Queue<Drink.TYPE> m_ReadyDrinkQue = new Queue<Drink.TYPE>();
     // Start is called before the first frame update
     void Start()
     {
@@ -22,8 +24,10 @@ public class StaffManager : MonoSingleton<StaffManager>
         staff.GetComponent<Staff>().SetState(Staff.STATE.WAITING);
         staff.GetComponent<Staff>().OnSetServingIsDoneCallback(OnServingIsDone);
         m_StaffList.Add(staff);
-        GuestManager.Instance().SetOnGetOrderCallback(OnGetOrder);
+        GuestManager.Instance().SetOnGetOrderFoodCallback(OnGetOrderFood);
+        GuestManager.Instance().SetOnGetOrderDrinkCallback(OnGetOrderDrink);
         DishManager.Instance().SetReadyFoodCallback(OnReadyFood);
+        DrinkMachineManager.Instance().SetReadyDrinkCallback(OnReadyDrink);
         StartCoroutine(OnCheckTimer());
     }
 
@@ -79,28 +83,45 @@ public class StaffManager : MonoSingleton<StaffManager>
         OnClearDishCallback += func;
     }
 
-    public void OnGetOrder(Ingredient.FOOD_TYPE foodType, int tableIndex)
+    public void OnGetOrderFood(Ingredient.FOOD_TYPE foodType, int tableIndex)
     {
-        if (m_OrderedDic.ContainsKey(tableIndex))
+        if (m_OrderedFoodDic.ContainsKey(tableIndex))
         {
-            m_OrderedDic[tableIndex] = foodType;
+            m_OrderedFoodDic[tableIndex] = foodType;
             return;
         }
 
         Debug.Log("TableIndex : " + tableIndex);
-        m_OrderedDic.Add(tableIndex, foodType);
+        m_OrderedFoodDic.Add(tableIndex, foodType);
+    }
+
+    public void OnGetOrderDrink(Drink.TYPE drinkType, int tableIndex)
+    {
+        if (m_OrderedDrinkDic.ContainsKey(tableIndex))
+        {
+            m_OrderedDrinkDic[tableIndex] = drinkType;
+            return;
+        }
+
+        Debug.Log("TableIndex : " + tableIndex);
+        m_OrderedDrinkDic.Add(tableIndex, drinkType);
     }
 
     public void OnReadyFood(Ingredient.FOOD_TYPE foodType, int dishIndex)
     {
-        if(m_ReadyDic.ContainsKey(dishIndex))
+        if(m_ReadyFoodDic.ContainsKey(dishIndex))
         {
-            m_ReadyDic[dishIndex] = foodType;
+            m_ReadyFoodDic[dishIndex] = foodType;
             return;
         }
 
         Debug.Log("DishIndex : " + dishIndex);
-        m_ReadyDic.Add(dishIndex, foodType);
+        m_ReadyFoodDic.Add(dishIndex, foodType);
+    }
+
+    public void OnReadyDrink(Drink.TYPE drinkType)
+    {
+        m_ReadyDrinkQue.Enqueue(drinkType);
     }
 
     bool Check(out Ingredient.FOOD_TYPE foodType, out int tableIndex, out int dishIndex)
@@ -109,14 +130,14 @@ public class StaffManager : MonoSingleton<StaffManager>
         tableIndex = 0;
         dishIndex = 0;
         // foreach 정리가 필요함.
-        foreach (KeyValuePair<int, Ingredient.FOOD_TYPE> orderedFood in m_OrderedDic)
+        foreach (KeyValuePair<int, Ingredient.FOOD_TYPE> orderedFood in m_OrderedFoodDic)
         {
             if(Ingredient.FOOD_TYPE.NONE == orderedFood.Value)
             {
                 continue;
             }
 
-            foreach(KeyValuePair<int, Ingredient.FOOD_TYPE> readyFood in m_ReadyDic)
+            foreach(KeyValuePair<int, Ingredient.FOOD_TYPE> readyFood in m_ReadyFoodDic)
             {
                 if(Ingredient.FOOD_TYPE.NONE == readyFood.Value)
                 {
@@ -128,8 +149,8 @@ public class StaffManager : MonoSingleton<StaffManager>
                     foodType = readyFood.Value;
                     tableIndex = orderedFood.Key;
                     dishIndex = readyFood.Key;
-                    m_ReadyDic[readyFood.Key] = Ingredient.FOOD_TYPE.NONE;
-                    m_OrderedDic[orderedFood.Key] = Ingredient.FOOD_TYPE.NONE;
+                    m_ReadyFoodDic[readyFood.Key] = Ingredient.FOOD_TYPE.NONE;
+                    m_OrderedFoodDic[orderedFood.Key] = Ingredient.FOOD_TYPE.NONE;
                     return true;
                 }
             }

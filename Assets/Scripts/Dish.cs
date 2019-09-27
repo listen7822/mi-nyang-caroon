@@ -12,7 +12,6 @@ public class Dish : MonoBehaviour
     }
     public delegate void SelectedDish(int dishIndex);
 
-    private Ingredient.FOOD_TYPE m_FoodType = 0;
     private Dictionary<Ingredient.FOOD_TYPE, List<Ingredient.INGREDIENT_TYPE>> m_IngrediantDic
         = new Dictionary<Ingredient.FOOD_TYPE, List<Ingredient.INGREDIENT_TYPE>>();
     private DISH_STATE m_State = DISH_STATE.NONE;

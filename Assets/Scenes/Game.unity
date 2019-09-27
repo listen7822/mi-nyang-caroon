@@ -284,6 +284,56 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &338507210
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 338507211}
+  - component: {fileID: 338507212}
+  m_Layer: 5
+  m_Name: DrinkMachineManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &338507211
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338507210}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 851828994}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 1727.9999, y: -650}
+  m_SizeDelta: {x: 192, y: 216}
+  m_Pivot: {x: 0, y: 1}
+--- !u!114 &338507212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338507210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efdb43ff528ad884ba3d9e2613881d3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_DrinkMachinePrefab: {fileID: 304866142024263458, guid: 61dfcd6d006e8364b945ca71e25fc9f6,
+    type: 3}
 --- !u!1 &725789641
 GameObject:
   m_ObjectHideFlags: 0
@@ -401,6 +451,7 @@ RectTransform:
   - {fileID: 2098144871}
   - {fileID: 96450180}
   - {fileID: 69816269}
+  - {fileID: 338507211}
   m_Father: {fileID: 1398829140}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -731,7 +782,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dc7baeb458c2344b9d94a6299d1f98e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_nTrayCnt: 3
   m_Tray: {fileID: 6537177881500870760, guid: 123047dd1c7bbae448a6047cf4c23317, type: 3}
 --- !u!1 &1398829137
 GameObject:
