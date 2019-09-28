@@ -19,7 +19,7 @@ public class StaffManager : MonoSingleton<StaffManager>
     void Start()
     {
         GameObject staff = GameObject.Instantiate(m_Staff) as GameObject;
-        staff.transform.localPosition = new Vector2(0, 0);
+        staff.transform.localPosition = new Vector2(244, 0);
         staff.transform.SetParent(this.transform, false);
         staff.GetComponent<Staff>().SetState(Staff.STATE.WAITING);
         staff.GetComponent<Staff>().OnSetServingIsDoneCallback(OnServingIsDone);

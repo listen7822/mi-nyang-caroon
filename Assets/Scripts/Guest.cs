@@ -11,9 +11,11 @@ public class Guest : MonoBehaviour
         INSIDE
     };
     private int m_TableIndex = 0;
+    public GameObject OrderOBJ;
     private Food m_OrderedFood;
     private OrderFood OnOrderFood = null;
     private OrderDrink OnOrderDrink = null;
+    public Animator animator;
     public delegate void OrderFood(Ingredient.FOOD_TYPE foodType, int tableIndex);
     public delegate void OrderDrink(Drink.TYPE drinkType, int tableIndex);
 
@@ -22,6 +24,7 @@ public class Guest : MonoBehaviour
     void Start()
     {
         m_GuestManager = gameObject.transform.parent.GetComponent<GuestManager>();
+        animator = GetComponent<Animator>();
     }
 
     public STATE GetState()
@@ -79,29 +82,35 @@ public class Guest : MonoBehaviour
 
     void OnPath1(int tableIndex)
     {
-        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(gameObject.transform.localPosition.x, -215, 0),
+        animator.SetBool("IsFront", true);
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(150, -457, 0),
             "isLocal", true, "easeType", iTween.EaseType.linear,
             "oncomplete", "OnPath2", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
     }
 
     void OnPath2(int tableIndex)
     {
-        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(641, -215, 0),
+        animator.SetBool("IsFront", false);
+        animator.SetBool("IsSide", true);
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(764, -457, 0),
            "isLocal", true, "easeType", iTween.EaseType.linear,
            "oncomplete", "OnPath3", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
     }
 
     void OnPath3(int tableIndex)
     {
-        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(641, -100, 0),
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 1, "position", new Vector3(764, -355, 0),
            "isLocal", true, "easeType", iTween.EaseType.linear,
            "oncomplete", "OnArrivedTable", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
     }
 
     void OnArrivedTable(int tableIdex)
     {
+        animator.SetBool("IsSide", false);
+        animator.SetBool("IsSeat", true);
         Debug.Log("손님이 테이블에 도착했습니다.");
         OnOrderFood(Ingredient.FOOD_TYPE.MACARRON, tableIdex);
         OnOrderDrink(Drink.TYPE.COFFEE, tableIdex);
+        iTween.ScaleTo(OrderOBJ, Vector3.one, 1);
     }
 }

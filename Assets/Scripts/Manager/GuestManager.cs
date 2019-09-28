@@ -20,7 +20,7 @@ public class GuestManager : MonoSingleton<GuestManager>
         for (int i = 0; i < GUEST_COUNT; ++i)
         {
             GameObject guest = GameObject.Instantiate(m_Guest) as GameObject;
-            guest.transform.position = new Vector2(0, 0);
+            guest.transform.position = new Vector2(150, 0);
             guest.transform.SetParent(this.transform, false);
             guest.SetActive(false);
             guest.GetComponent<Guest>().SetState(Guest.STATE.WAITING_OUTSIDE);
