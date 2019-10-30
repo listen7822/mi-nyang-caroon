@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Guest : MonoBehaviour
 {
@@ -11,106 +12,129 @@ public class Guest : MonoBehaviour
         INSIDE
     };
     private int m_TableIndex = 0;
-    public GameObject OrderOBJ;
-    private Food m_OrderedFood;
-    private OrderFood OnOrderFood = null;
+
     private OrderDrink OnOrderDrink = null;
     public Animator animator;
-    public delegate void OrderFood(Ingredient.FOOD_TYPE foodType, int tableIndex);
+
     public delegate void OrderDrink(Drink.TYPE drinkType, int tableIndex);
 
     private STATE m_State = STATE.WAITING_OUTSIDE;
-    // Start is called before the first frame update
+
+    IEnumerator countGauge;
+
+
+    public float waitTime = 100f;
+
+    public Slider slider;
+
+    private int sitTableNum;
+
+    private Table sitTable;
+
+    public GameObject OrderOBJ;
+    public Image OrderImage;
+
     void Start()
     {
         m_GuestManager = gameObject.transform.parent.GetComponent<GuestManager>();
         animator = GetComponent<Animator>();
+        countGauge = CountGauge(30f);
     }
 
-    public STATE GetState()
+    public void Eat()
     {
-        return m_State;
+        //ResetGauge();
+        ResetObj();
+        animator.SetBool("IsEat",true);
+        Invoke("Reset_All" , 5);
     }
 
-    public void SetState(STATE state)
+    public void Co_MoveToTable(Vector3 first , Vector3 second, Vector3 third, int tableIndex)
     {
-        m_State = state;
+        //Debug.Log(first);
+        Reset();
+        gameObject.SetActive(true);
+        StartCoroutine(MoveToTable(first ,second,third,tableIndex));
+        sitTableNum = tableIndex;   
     }
 
-    public int GetTableIndex()
-    {
-        return m_TableIndex;
-    }
-
-    public int Eat()
-    {
-        // 먹은 음식에 대한 스코어를 리턴해준다.
-        return 100;
-    }
-
-    public void Leave()
-    {
-        m_State = STATE.WAITING_OUTSIDE;
-        m_TableIndex = 0;
-        gameObject.SetActive(false);
-        gameObject.transform.localPosition = new Vector3(0, 0, 0);
-    }
-
-    public void Clear()
-    {
-    }
-
-    public void SetOrderFoodCallback(OrderFood func)
-    {
-        OnOrderFood += func;
-    }
-
-    public void SetOrderDrinkCallback(OrderDrink func)
-    {
-        OnOrderDrink += func;
-    }
-
-    public void GoToTable(int index)
-    {
-        // 손님이 선호하는 음식 전달.
-        Vector2 pos = TableManager.Instance().GetTablePos(index);
-        // pos 위치로 이동하는 애니메이션 후 다도착하면 음식 주문.
-        Debug.Log("손님 이동 시작");
-        m_TableIndex = index;
-        OnPath1(index);
-    }
-
-    void OnPath1(int tableIndex)
+    IEnumerator MoveToTable(Vector3 first , Vector3 second, Vector3 third, int tableIndex)
     {
         animator.SetBool("IsFront", true);
-        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(150, -457, 0),
-            "isLocal", true, "easeType", iTween.EaseType.linear,
-            "oncomplete", "OnPath2", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
-    }
-
-    void OnPath2(int tableIndex)
-    {
+        
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 3, "position", first,"isLocal", false, "easeType", iTween.EaseType.linear));
+        yield return new WaitForSeconds(3f);
+        
         animator.SetBool("IsFront", false);
         animator.SetBool("IsSide", true);
-        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(764, -457, 0),
-           "isLocal", true, "easeType", iTween.EaseType.linear,
-           "oncomplete", "OnPath3", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
-    }
+        
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 3, "position", second,"isLocal", false, "easeType", iTween.EaseType.linear));
+        yield return new WaitForSeconds(3f);
+        
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 3, "position", third,"isLocal", false, "easeType", iTween.EaseType.linear));
+        yield return new WaitForSeconds(3f);
 
-    void OnPath3(int tableIndex)
-    {
-        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 1, "position", new Vector3(764, -355, 0),
-           "isLocal", true, "easeType", iTween.EaseType.linear,
-           "oncomplete", "OnArrivedTable", "oncompletetarget", gameObject, "oncompleteparams", tableIndex));
+        OnArrivedTable(tableIndex);
     }
-
     void OnArrivedTable(int tableIdex)
     {
         animator.SetBool("IsSide", false);
         animator.SetBool("IsSeat", true);
-        Debug.Log("손님이 테이블에 도착했습니다.");
-        OnOrderFood(Ingredient.FOOD_TYPE.MACARRON, tableIdex);
-        OnOrderDrink(Drink.TYPE.COFFEE, tableIdex);
+        //Debug.Log("손님이 테이블에 도착했습니다.");
+
+        sitTable = TableManager.Instance().tables[tableIdex];
+        sitTable.sitGuest = this;
+        sitTable.IsEmpty = false;
+        StartCoroutine(OrderFoods());
+    }
+
+    IEnumerator OrderFoods()
+    {
+        yield return new WaitForSeconds(1);
+        int orderNum = Random.Range(0,4);
+        sitTable.orderfood = FoodIngredientsManager.Instance().GetFoodInfo(orderNum);
+        OrderImage.sprite = FoodIngredientsManager.Instance().GetImage(orderNum);
         iTween.ScaleTo(OrderOBJ, Vector3.one, 1);
+        StartCoroutine(countGauge);
+        DishManager_fix.Instance().CheckOrder();
+    }
+
+    public IEnumerator CountGauge(float time)
+    {
+        slider.gameObject.SetActive(true);
+        slider.maxValue = slider.value = time;
+        while(slider.value > 0)
+        {
+            slider.value--;
+            yield return new WaitForSeconds(1);
+        }
+        ResetGauge();
+        ResetObj();
+        Reset_All();
+    }
+
+    public void ResetGauge()
+    {
+        StopCoroutine(countGauge);
+        countGauge = CountGauge(30);
+        slider.value = slider.maxValue;
+        slider.gameObject.SetActive(false);
+    }
+
+    void ResetObj()
+    {
+        OrderOBJ.transform.localScale = Vector3.zero;
+    }
+
+    public void Reset_All()
+    {
+        sitTable.Reset();
+        GuestManager.Instance().guestQueue.Enqueue(this);
+        Reset();
+    }
+    public void Reset()
+    {
+        transform.localPosition = new Vector2(0, 0);
+        gameObject.SetActive(false);  
     }
 }

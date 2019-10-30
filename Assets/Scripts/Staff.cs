@@ -9,21 +9,14 @@ public class Staff : MonoBehaviour
         WAITING = 0,
         SERVING
     }
-    public delegate void ServingIsDone(Ingredient.FOOD_TYPE foodType, int tableIndex);
 
+    public Animator animator;
     private STATE m_State = STATE.WAITING;
-    private ServingIsDone OnServingIsDone = null;
-    // Start is called before the first frame update
-    void Start()
-    {
-        //Debug.Log(GetComponent<RectTransform>().sizeDelta.x);
-        ////iTween.MoveBy(gameObject, iTween.Hash("x", 1920, "islocal", true, "easeType", "easeInOutExpo", "loopType", "pingPong", "delay", .1));
-    }
+    public Vector3 staffPos;
 
-    // Update is called once per frame
-    void Update()
+    void Awake()
     {
-        
+        animator = GetComponent<Animator>();
     }
 
     public STATE GetState()
@@ -31,52 +24,41 @@ public class Staff : MonoBehaviour
         return m_State;
     }
 
-    public void SetState(STATE state)
+    public void Co_MoveToTable(Vector3 first, Vector3 second, int tableIndex)
     {
-        m_State = state;
+        m_State = STATE.SERVING;
+        StartCoroutine(MoveToTable(first, second, tableIndex));
     }
 
-    public void OnSetServingIsDoneCallback(ServingIsDone func)
+    //TableManager의 Route위치를 이용해 해당 테이블 근처로 이동하는 코드(수정 예정)
+    IEnumerator MoveToTable(Vector3 first, Vector3 second, int tableIndex)
     {
-        OnServingIsDone += func;
-    }
+        animator.SetBool("IsServe", true);
 
-    public void Serving(Ingredient.FOOD_TYPE foodType, int tableIndex)
-    {
-        // 애니메이션으로 테이블에 도착하면 true 리턴.,
-        DeliverFoodToCustomer(foodType, tableIndex);
-    }
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 3, "position", first, "isLocal", false, "easeType", iTween.EaseType.linear));
+        yield return new WaitForSeconds(3f);
 
-    public void ReturnToWaitingPos()
-    {
-        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(0, 0, 0),
-            "isLocal", true, "easeType", iTween.EaseType.linear,
-            "oncomplete", "OnArrivedWaitingPos", "oncompletetarget", gameObject));
-    }
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 3, "position", second, "isLocal", false, "easeType", iTween.EaseType.linear));
+        yield return new WaitForSeconds(3f);
 
-    public void DeliverFoodToCustomer(Ingredient.FOOD_TYPE foodType, int tableIndex)
-    {
-        // 테이블의 위치를 물어봐야한다...
-        Vector2 pos = TableManager.Instance().GetTablePos(tableIndex);
+        yield return new WaitForSeconds(1f);
 
-        Hashtable hashtable = new Hashtable();
-        hashtable.Add("foodType", foodType);
-        hashtable.Add("tableIndex", tableIndex);
+        TableManager.Instance().tables[tableIndex].SetFoodOnTable();
 
-        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 5, "position", new Vector3(1920 - (660) - (GetComponent<RectTransform>().sizeDelta.x), 0, 0),
-            "isLocal", true, "easeType", iTween.EaseType.linear,
-            "oncomplete", "OnArriveToCustomer", "oncompletetarget", gameObject, "oncompleteparams", hashtable));
+        transform.localScale = new Vector3(transform.localScale.x * -1, 1, 1);
 
-    }
-
-    public void OnArriveToCustomer(Hashtable hashtable)
-    {
-        Debug.LogWarning("Serving is Done. : " + (Ingredient.FOOD_TYPE)hashtable["foodType"]);
-        OnServingIsDone((Ingredient.FOOD_TYPE)hashtable["foodType"], (int)hashtable["tableIndex"]);
-    }
-
-    public void OnArrivedWaitingPos()
-    {
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 3, "position", first, "isLocal", false, "easeType", iTween.EaseType.linear));
+        yield return new WaitForSeconds(3f);
+        
+        iTween.MoveTo(gameObject, iTween.Hash("x", 1, "time", 3, "position", new Vector3(-830, 0, 0), "isLocal", true, "easeType", iTween.EaseType.linear));
+        yield return new WaitForSeconds(3f);
+        
+        transform.localScale = new Vector3(transform.localScale.x * -1, 1, 1);
+        
+        animator.SetBool("IsServe", false);
+        animator.SetBool("IsWait", true);
+        
         m_State = STATE.WAITING;
+        DishManager_fix.Instance().CheckOrder();
     }
 }

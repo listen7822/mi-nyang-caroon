@@ -52,6 +52,7 @@ public class DialogueManager : MonoBehaviour
         StartCoroutine(DialogueOpen("SceneSample3"));
     }
     
+    //Assets\Resources\Dialogue\Scene 폴더에 있는 csv 이름을 찾아서 읽어옴
     public IEnumerator DialogueOpen(string sceneName)
     {
         CsvNum = 0;
@@ -69,6 +70,7 @@ public class DialogueManager : MonoBehaviour
         StartLine();
     }
 
+    //csv 스크립트의 Function 내용에 따라 다른 액션을 하도록 함.
     void StartLine()
     {
         if(CsvNum >= data.Count)
@@ -92,6 +94,7 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    
     void EndDialogue()
     {
         Debug.Log("Dialogue Is Over");
@@ -200,9 +203,4 @@ public class DialogueManager : MonoBehaviour
             StartLine();
         }
     }
-
-
-    
-
-
 }

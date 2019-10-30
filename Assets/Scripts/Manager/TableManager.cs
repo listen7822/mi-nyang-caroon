@@ -4,114 +4,80 @@ using UnityEngine;
 
 public class TableManager : MonoSingleton<TableManager>
 {
-    const int X_TABLE_COUNT = 2;
-    const int Y_TABLE_COUNT = 2;
-    private static List<GameObject> m_Tables = new List<GameObject>();
-    private ArrivedFood OnArrivedFood = null;
-    private AvailableTable OnAvailableTable = null;
-    public GameObject m_Table;
-    public delegate void ArrivedFood(int tableIndex);
-    public delegate void AvailableTable(int tableIndex);
-    // Start is called before the first frame update
-    void Start()
+    public Table[] tables;
+
+    public Vector3[,] route = new Vector3[3,3];
+
+    void Awake()
     {
-        Vector2 hallSize = GetComponent<RectTransform>().sizeDelta;
-        Vector2 spaceThatOneObjectCanUse = new Vector2(hallSize.x / X_TABLE_COUNT, hallSize.y / Y_TABLE_COUNT );
-        int indexX = 0;
-        int indexY = 0;
-        int tableIndex = 1;
-
-        for (int i = 0; i < Y_TABLE_COUNT; ++i)
+        int a = 8;
+        //테이블로 가는 위치 route 포지션을 받아옴
+        for (int i = 2; i >= 0; i--)
         {
-            for(int j = 0; j < X_TABLE_COUNT; ++j)
+            for (int j = 2; j >= 0; j--)
             {
-                GameObject table = GameObject.Instantiate(m_Table) as GameObject;
-                table.transform.localPosition = new Vector2(indexX * spaceThatOneObjectCanUse.x, -indexY * spaceThatOneObjectCanUse.y);
-                table.transform.SetParent(this.transform, false);
-                table.GetComponent<Table>().SetIndex(tableIndex);
-                table.GetComponent<Table>().SetState(Table.STATE.EMPTY);
-                m_Tables.Add(table);
-                ++indexX;
-                ++tableIndex;
-            }
-            indexX = 0;
-            ++indexY;
-        }
-
-        StaffManager.Instance().SetServedCallback(OnServed);
-        GuestManager.Instance().SetFinishToEatCallback(OnFinishToEat);
-        StartCoroutine(CheckTableTimer());
-    }
-
-    private IEnumerator CheckTableTimer()
-    {
-        while(true)
-        {
-            foreach(GameObject table in m_Tables)
-            {
-                yield return new WaitForSeconds(3.0f);
-                if(Table.STATE.EMPTY == table.GetComponent<Table>().GetState())
-                {
-                    Debug.Log("AvailableTable : " + table.GetComponent<Table>().GetIndex());
-                    table.GetComponent<Table>().SetState(Table.STATE.USED);
-                    OnAvailableTable(table.GetComponent<Table>().GetIndex());
-                    break;
-                }
+                    route[i,j] = transform.GetChild(1).GetChild(a).transform.position;
+                    a--;
             }
         }
     }
 
-    public void OnServed(Ingredient.FOOD_TYPE foodType, int tableIndex)
+    public void GetTablePos(int tableIndex , Guest guest)
     {
-        foreach(GameObject table in m_Tables)
+        switch (tableIndex)
         {
-            if(true == table.GetComponent<Table>().SetFoodOnTable(foodType))
-            {
-                // GuestManager에게 음식이 도착했음을 알린다.
-                OnArrivedFood(tableIndex);
-                break;
-            }
+            
+            case 0:
+            guest.Co_MoveToTable(route[0,0] , route[1,0] , tables[0].seat.position , tableIndex);
+            break;
+            
+            case 1:
+            guest.Co_MoveToTable(route[0,0] , route[2,0] , tables[1].seat.position , tableIndex);
+            break;
+            
+            case 2:
+            guest.Co_MoveToTable(route[0,1] , route[1,1] , tables[2].seat.position , tableIndex);
+            break;
+            
+            case 3:
+            guest.Co_MoveToTable(route[0,1] , route[2,1] , tables[3].seat.position , tableIndex);
+            break;
         }
     }
 
-
-    public void SetOnArrivedFoodCallback(ArrivedFood func)
+    public void GetStaffTablePos(int tableIndex)
     {
-        OnArrivedFood += func;
-    }
-
-    public void SetOnAvailableTableCallback(AvailableTable func)
-    {
-        OnAvailableTable += func;
-    }
-
-    public void OnFinishToEat(int tableIndex)
-    {
-        foreach(GameObject table in m_Tables)
+        Staff staff = StaffManager.Instance().staff;
+        switch (tableIndex)
         {
-            if(tableIndex == table.GetComponent<Table>().GetIndex())
-            {
-                table.GetComponent<Table>().ClearTable();
-            }
+            case 0:
+            staff.Co_MoveToTable(route[0,1] , route[1,1] , tableIndex);
+            break;
+            
+            case 1:
+            staff.Co_MoveToTable(route[0,1] , route[2,1] , tableIndex);
+            break;
+            
+            case 2:
+            staff.Co_MoveToTable(route[0,1] , route[1,1] , tableIndex);
+            break;
+            
+            case 3:
+            staff.Co_MoveToTable(route[0,1] , route[2,1] , tableIndex);
+            break;
         }
     }
 
-    public Vector2 GetTablePos(int tableIndex)
+    //빈 테이블 목록 받아옴
+    public Table GetEmptyTable()
     {
-        foreach(GameObject table in m_Tables)
+        foreach (var table in tables)
         {
-            if(tableIndex == table.GetComponent<Table>().GetIndex())
+            if(table.IsEmpty)
             {
-                return table.GetComponent<Transform>().localPosition;
+                return table;
             }
         }
-
-        return new Vector2(0, 0);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return null;
     }
 }

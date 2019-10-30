@@ -13,7 +13,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - test
   - 
   - 
   - 
@@ -46,4 +46,7 @@ TagManager:
     locked: 0
   - name: Table
     uniqueID: 3300096223
+    locked: 0
+  - name: obj
+    uniqueID: 2243039693
     locked: 0
